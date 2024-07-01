@@ -5,6 +5,7 @@ import threading
 from data_queue import DataQueue
 from data_consumer import DataConsumer
 from datetime import datetime
+import pandas as pd
 
 st.set_page_config(
     page_title="Streamlit Dashboard",
@@ -109,11 +110,15 @@ while True:
     # If parameters are selected, display the charts
     if parameter1 and parameter2:
         df = queue.get(conid)  # Make sure this is non-blocking or handled in a separate thread
-
+        
+        # Ensure df is a DataFrame
+        if isinstance(df, list):
+            df = pd.DataFrame(df)
+        
         # Use current time if 'datetime' is not present in the data
         if 'datetime' not in df.columns:
             df['datetime'] = datetime.now()
-
+        
         with placeholder_col1:
             st.line_chart(df, x="datetime", y=[parameter1], height=300)
         with placeholder_col2:
