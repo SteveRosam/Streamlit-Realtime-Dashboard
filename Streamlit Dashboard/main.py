@@ -113,8 +113,12 @@ while True:
         
         # Ensure df is a DataFrame
         if isinstance(df, list):
-            df = pd.DataFrame(df)
-        
+            try:
+                df = pd.DataFrame(df)
+            except ValueError as e:
+                st.error(f"Error converting data to DataFrame: {e}")
+                df = pd.DataFrame()  # Create an empty DataFrame to avoid further errors
+          
         # Use current time if 'datetime' is not present in the data
         if 'datetime' not in df.columns:
             df['datetime'] = datetime.now()
