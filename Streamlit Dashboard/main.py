@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 st.set_page_config(layout="wide")
-st_autorefresh(interval=60000, key="datarefresh")
+
+st_autorefresh(interval=30000, key="datarefresh")
 
 os.environ["INFLUXDB_TOKEN"] = "A6I_zqTR_oA0sNS2_fvE13OE_0m4fgOFpL_elvaEMoyl8t0YxU67dUgkzIEBsJqkEtMCCcR507G_SIhpRIOOvQ=="
 os.environ["INFLUXDB_HOST"] = "https://eu-central-1-1.aws.cloud2.influxdata.com"
