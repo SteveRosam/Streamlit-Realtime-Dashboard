@@ -12,11 +12,6 @@ st.set_page_config(layout="wide")
 
 st_autorefresh(interval=30000, key="datarefresh")
 
-os.environ["INFLUXDB_TOKEN"] = "A6I_zqTR_oA0sNS2_fvE13OE_0m4fgOFpL_elvaEMoyl8t0YxU67dUgkzIEBsJqkEtMCCcR507G_SIhpRIOOvQ=="
-os.environ["INFLUXDB_HOST"] = "https://eu-central-1-1.aws.cloud2.influxdata.com"
-os.environ["INFLUXDB_ORG"] = "streamlit"
-os.environ["INFLUXDB_DATABASE"] = "formula_one"
-
 client = InfluxDBClient3(token=os.environ["INFLUXDB_TOKEN"],
                          host=os.environ["INFLUXDB_HOST"],
                          org=os.environ["INFLUXDB_ORG"],
