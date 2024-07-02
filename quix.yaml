@@ -46,7 +46,7 @@ deployments:
         inputType: FreeText
         description: Organization name in InfluxDB.
         required: false
-        value: Quix
+        value: ghjghjghjg
       - name: INFLUXDB_MEASUREMENT_NAME
         inputType: FreeText
         description: The InfluxDB measurement to write data to. If not specified, the name of the input topic will be used
