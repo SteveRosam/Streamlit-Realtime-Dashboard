@@ -79,3 +79,9 @@ st.metric(label="Gear", value=f"{gear}")
 # Display LapNumber
 lapnumber = df['LapNumber'].iloc[-1] if 'LapNumber' in df.columns else 0
 st.metric(label="LapNumber", value=f"{lapnumber}")
+
+st.markdown(
+    """
+    For more details, visit the [GitHub repository]().
+    """
+)
