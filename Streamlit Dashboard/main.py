@@ -68,13 +68,14 @@ ORDER BY time
 
 df = client.query(query=query, mode="pandas", language="sql")
 
-# Display Speed on a gauge
+# Display Speed
 speed = df['Speed'].iloc[-1] if 'Speed' in df.columns else 0
 st.metric(label="Speed", value=f"{speed} km/h")
 
-# Display Gear on a bar chart
-last_gear = df['Gear'].iloc[-1] if 'Gear' in df.columns else None
-if last_gear is not None:
-    st.bar_chart(pd.Series([last_gear], index=["Last Gear"]))
-else:
-    st.write("No Gear data available")
+# Display Gear
+gear = df['Gear'].iloc[-1] if 'Gear' in df.columns else 0
+st.metric(label="Gear", value=f"{gear}")
+
+# Display LapNumber
+lapnumber = df['LapNumber'].iloc[-1] if 'LapNumber' in df.columns else 0
+st.metric(label="LapNumber", value=f"{lapnumber}")
