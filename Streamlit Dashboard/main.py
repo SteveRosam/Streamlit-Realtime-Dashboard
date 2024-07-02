@@ -65,7 +65,7 @@ st.markdown(
 # Query InfluxDB
 query = f'''
 SELECT *
-FROM "my_table"
+FROM "telemetry"
 WHERE time > now() - interval '1 minute'
 ORDER BY time
 '''
