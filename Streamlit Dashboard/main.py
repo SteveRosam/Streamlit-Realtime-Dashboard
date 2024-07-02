@@ -73,5 +73,8 @@ speed = df['Speed'].iloc[-1] if 'Speed' in df.columns else 0
 st.metric(label="Speed", value=f"{speed} km/h")
 
 # Display Gear on a bar chart
-gear_counts = df['Gear'].value_counts().sort_index() if 'Gear' in df.columns else pd.Series()
-st.bar_chart(gear_counts)
+last_gear = df['Gear'].iloc[-1] if 'Gear' in df.columns else None
+if last_gear is not None:
+    st.bar_chart(pd.Series([last_gear], index=["Last Gear"]))
+else:
+    st.write("No Gear data available")
