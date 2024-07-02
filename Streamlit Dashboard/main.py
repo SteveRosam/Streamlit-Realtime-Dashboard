@@ -10,7 +10,7 @@ load_dotenv()
 
 st.set_page_config(layout="wide")
 
-st_autorefresh(interval=30000, key="datarefresh")
+st_autorefresh(interval=1000, key="datarefresh")
 
 client = InfluxDBClient3(token=os.environ["INFLUXDB_TOKEN"],
                          host=os.environ["INFLUXDB_HOST"],
