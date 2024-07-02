@@ -1,9 +1,9 @@
-name: Streamlit Dashboard
-language: python
+name: influxdb-3-destination
+language: Python
 variables:
   - name: input
     inputType: InputTopic
-    description: Name of the input topic to listen to.
+    description: This is the input topic
     defaultValue: f1-data
     required: true
   - name: INFLUXDB_HOST
@@ -31,6 +31,16 @@ variables:
     description: Database name in InfluxDB where data should be stored.
     defaultValue: 'Quix'
     required: true
+  - name: CONSUMER_GROUP_NAME
+    inputType: FreeText
+    description: The name of the consumer group to use when consuming from Kafka
+    defaultValue: influxdb-sink
+    required: true
+  - name: TIMESTAMP_COLUMN
+    inputType: FreeText
+    description: 'The column containing the timestamp column. NOTE: Must be nanoseconds'
+    defaultValue: ''
+    required: false
 dockerfile: dockerfile
 runEntryPoint: main.py
-defaultFile: streamlit_file.py
+defaultFile: main.py
