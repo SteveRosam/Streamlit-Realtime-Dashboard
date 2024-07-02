@@ -1,108 +1,81 @@
-# import Utility modules
-import os
-import ast
-from datetime import datetime
-import logging
-import pickle
-from time import time
-
-# import vendor-specific modules
-from quixstreams import Application, State
-from quixstreams import message_context
-from typing import List, Dict
-
+import streamlit as st
 from influxdb_client_3 import Point, InfluxDBClient3
-
-# for local dev, load env vars from a .env file
+import pandas as pd
+import plotly.express as px
+import os
+from streamlit_autorefresh import st_autorefresh
 from dotenv import load_dotenv
+
 load_dotenv()
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='[%(asctime)s] [%(levelname)s]: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+st.set_page_config(layout="wide")
+st_autorefresh(interval=60000, key="datarefresh")
 
-logger = logging.getLogger(__name__)
+os.environ["INFLUXDB_TOKEN"] = "A6I_zqTR_oA0sNS2_fvE13OE_0m4fgOFpL_elvaEMoyl8t0YxU67dUgkzIEBsJqkEtMCCcR507G_SIhpRIOOvQ=="
+os.environ["INFLUXDB_HOST"] = "https://eu-central-1-1.aws.cloud2.influxdata.com"
+os.environ["INFLUXDB_ORG"] = "streamlit"
+os.environ["INFLUXDB_DATABASE"] = "formula_one"
 
-# read the consumer group from config
-consumer_group_name = os.environ.get("CONSUMER_GROUP_NAME", "influxdb-data-writer")
-
-# read the timestamp column from config
-timestamp_column = os.environ.get("TIMESTAMP_COLUMN", "")
-
-# Create a Quix platform-specific application instead
-app = Application.Quix(consumer_group=consumer_group_name, auto_offset_reset="earliest", use_changelog_topics=False)
-
-input_topic = app.topic(os.environ["input"])
-                                           
-influx3_client = InfluxDBClient3(token=os.environ["INFLUXDB_TOKEN"],
+client = InfluxDBClient3(token=os.environ["INFLUXDB_TOKEN"],
                          host=os.environ["INFLUXDB_HOST"],
                          org=os.environ["INFLUXDB_ORG"],
                          database=os.environ["INFLUXDB_DATABASE"])
 
-# Get the measurement name to write data to
-measurement_name = os.environ.get("INFLUXDB_MEASUREMENT_NAME", "measurement1")
+st.markdown(
+    """
+    <style>
+    .main .block-container {
+        padding-top: 1rem;  /* Adjust this value as needed */
+    }
+    .title-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;  /* Align items to the top */
+    }
+    .title-container svg {
+        margin-left: 10px;  /* Adjust this value as needed */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-# Initialize a buffer for batching points and a timestamp for the last write
-points_buffer = []
-service_start_state = True
-last_write_time_ns = int(time() * 1e9)  # Convert current time from seconds to nanoseconds
+st.markdown(
+    """
+    <div class="title-container">
+        <div>
+            <h1>US election real-time analysis</h1>
+            <h3>Subtitle goes here</h3>
+        </div>
+        <svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 288.57" width="150">
+            <g id="Layer_1-2">
+                <g>
+                    <rect x="118.03" y="118.03" width="52.46" height="52.46" fill="#0064ff"></rect>
+                    <rect x="177.05" y="177.05" width="52.46" height="52.46" rx="7.87" ry="7.87" fill="#bd2eff"></rect>
+                    <circle cx="258.36" cy="258.36" r="30.16" fill="#ff7828"></circle>
+                    <path d="M283.28,0H5.25C2.35,0,0,2.35,0,5.25V283.28c0,2.9,2.35,5.25,5.25,5.25H165.25c2.9,0,5.25-2.35,5.25-5.25v-41.97c0-2.9-2.35-5.25-5.25-5.25H52.46V52.46H236.07v113.07c0,2.9,2.35,5.25,5.25,5.25h41.97c2.9,0,5.25-2.35,5.25-5.25V5.25c0-2.9-2.35-5.25-5.25-5.25Zm301.68,118.08h-42.05c-2.9,0-5.25,2.35-5.25,5.25v160c0,2.9,2.35,5.25,5.25,5.25h42.05c2.9,0,5.25-2.35,5.25-5.25V123.32c0-2.9-2.35-5.25-5.25-5.25Zm0-91.89h-42.05c-2.9,0-5.25,2.35-5.25,5.25v42.05c0,2.9,2.35,5.25,5.25,5.25h42.05c2.9,0,5.25-2.35,5.25-5.25V31.43c0-2.9-2.35-5.25-5.25-5.25Zm-91.73,91.89h-42.05c-2.9,0-5.25,2.35-5.25,5.25v112.7h-65.63V123.28c0-2.9-2.35-5.25-5.25-5.25h-42.05c-2.9,0-5.25,2.35-5.25,5.25l.22,160.05c0,2.89,2.35,5.24,5.25,5.24h160.01c2.9,0,5.25-2.35,5.25-5.25V123.32c0-2.9-2.35-5.25-5.25-5.25Zm306.77,5.2c0-2.9-2.35-5.25-5.25-5.25h-41.97c-2.9,0-5.25,2.35-5.25,5.25v34.1l-32.79,21.86-32.79-21.86v-34.1c0-2.9-2.35-5.25-5.25-5.25h-41.97c-2.9,0-5.25,2.35-5.25,5.25v47.21l49.18,32.79-49.18,32.79v47.21c0,2.9,2.35,5.25,5.25,5.25h41.97c2.9,0,5.25-2.35,5.25-5.25v-34.45l32.6-21.63,32.98,21.98v34.1c0,2.9,2.35,5.25,5.25,5.25h41.97c2.9,0,5.25-2.35,5.25-5.25v-47.21l-49.29-32.86,49.29-32.71v-47.21Z" fill="#14174d"></path>
+                </g>
+            </g>        
+        </svg>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
+# Query InfluxDB
+query = f'''
+SELECT *
+FROM "my_table"
+WHERE time > now() - interval '1 minute'
+ORDER BY time
+'''
 
-def send_data_to_influx(messages: List[dict], key, timestamp, _):
+df = client.query(query=query, mode="pandas", language="sql")
 
-    points_buffer = []
+# Display Speed on a gauge
+speed = df['Speed'].iloc[-1] if 'Speed' in df.columns else 0
+st.metric(label="Speed", value=f"{speed} km/h")
 
-
-    for message in messages:
-        if timestamp_column == '':
-            message_time_ns = timestamp * 1000 * 1000
-        else:
-            message_time_ns = message[timestamp_column]
-
-        
-        # Initialize the tags and fields dictionaries
-        tags = {}
-        fields = {}
-
-        # Iterate over the tag_dict and field_dict to populate tags and fields
-        if "tags" in message:
-            for tag_key in message["tags"]:
-                tags[tag_key] = message["tags"][tag_key]
-
-        for field_key in message:
-            if field_key == "tags" or field_key == timestamp_column:
-                continue
-            fields[field_key] = message[field_key]
-
-        # Check if fields dictionary is not empty
-        if not fields and not tags:
-            logger.debug("Fields and Tags are empty: No data to write to InfluxDB.")
-            return  # Skip writing to InfluxDB
-        
-        # Create a new Point and add it to the buffer
-        point = Point(measurement_name).time(message_time_ns)
-        for tag_key, tag_value in tags.items():
-            point.tag(tag_key, tag_value)
-        for field_key, field_value in fields.items():
-            point.field(field_key, field_value)
-        points_buffer.append(point.to_line_protocol())
-
-    for point in points_buffer:
-            logger.debug(f"Line Protocol: {point}")
-
-    with influx3_client as client:
-        logger.info(f"Writing batch of {len(points_buffer)} points written to InfluxDB.")
-        
-        client.write(record=points_buffer)
-
- 
-
-sdf = app.dataframe(input_topic)
-
-sdf = sdf.apply(lambda row: [row]).update(send_data_to_influx, metadata=True)
-
-if __name__ == "__main__":
-    logger.info("Starting application")
-    app.run(sdf)
+# Display Gear on a bar chart
+gear_counts = df['Gear'].value_counts().sort_index() if 'Gear' in df.columns else pd.Series()
+st.bar_chart(gear_counts)
