@@ -32,11 +32,6 @@ deployments:
       enabled: true
       urlPrefix: streamlit
     variables:
-      - name: input
-        inputType: InputTopic
-        description: Name of the input topic to listen to.
-        required: true
-        value: f1-data
       - name: INFLUXDB_HOST
         inputType: FreeText
         description: Host address for the InfluxDB instance.
@@ -46,7 +41,7 @@ deployments:
         inputType: Secret
         description: Authentication token to access InfluxDB.
         required: true
-        value: INFLUXDB_TOKEN
+        secretKey: INFLUXDB_TOKEN
       - name: INFLUXDB_ORG
         inputType: FreeText
         description: Organization name in InfluxDB.
@@ -85,7 +80,7 @@ deployments:
         inputType: Secret
         description: Authentication token to access InfluxDB.
         required: true
-        value: INFLUXDB_TOKEN
+        secretKey: INFLUXDB_TOKEN
       - name: INFLUXDB_ORG
         inputType: FreeText
         description: Organization name in InfluxDB.
