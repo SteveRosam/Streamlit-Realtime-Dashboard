@@ -69,15 +69,15 @@ ORDER BY time
 df = client.query(query=query, mode="pandas", language="sql")
 
 # Display Speed
-speed = df['Speed'].iloc[-1] if 'Speed' in df.columns else 0
+speed = df['Speed'].iloc[-1] if 'Speed' in df.columns and not df.empty else 0
 st.metric(label="Speed", value=f"{speed} km/h")
 
 # Display Gear
-gear = df['Gear'].iloc[-1] if 'Gear' in df.columns else 0
+gear = df['Gear'].iloc[-1] if 'Gear' in df.columns and not df.empty else 0
 st.metric(label="Gear", value=f"{gear}")
 
 # Display LapNumber
-lapnumber = df['LapNumber'].iloc[-1] if 'LapNumber' in df.columns else 0
+lapnumber = df['LapNumber'].iloc[-1] if 'LapNumber' in df.columns and not df.empty else 0
 st.metric(label="LapNumber", value=f"{lapnumber}")
 
 st.markdown(
