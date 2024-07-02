@@ -85,3 +85,9 @@ st.markdown(
     For more details, visit the [GitHub repository]().
     """
 )
+
+st.markdown(
+    """
+    Check out and `pip install quixstreams` for more info [here]().
+    """
+)
