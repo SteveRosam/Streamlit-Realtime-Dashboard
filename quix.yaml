@@ -110,7 +110,7 @@ deployments:
 # This section describes the Topics of the data pipeline
 topics:
   - name: f1-data
-    persisted: true
+    persisted: false
     configuration:
       partitions: 1
   - name: my_source
