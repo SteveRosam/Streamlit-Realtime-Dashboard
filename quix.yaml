@@ -113,3 +113,5 @@ topics:
     persisted: false
     configuration:
       partitions: 1
+  - name: my_source
+    persisted: false
